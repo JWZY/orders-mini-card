@@ -29,6 +29,12 @@ body {
   background: #d8d4cf;
   min-height: 100vh;
   overflow: hidden;
+  opacity: 0;
+  transition: opacity 0.6s ease-out;
+}
+
+body.ready {
+  opacity: 1;
 }
 
 /* ========== SCENE ========== */

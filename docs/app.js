@@ -15,6 +15,15 @@ const LOCAL_MODELS = [
 
 // Store loaded models for GUI manipulation
 const loadedModels = {};
+let modelsLoaded = 0;
+const totalModels = LOCAL_MODELS.length;
+
+function checkAllLoaded() {
+  modelsLoaded++;
+  if (modelsLoaded >= totalModels) {
+    document.body.classList.add('ready');
+  }
+}
 
 // ============================================
 // MOCK DATA
@@ -336,6 +345,7 @@ function loadFurniture() {
       scene.add(model);
       loadedModels[modelConfig.name] = model;
       console.log(`✓ ${modelConfig.name} loaded`);
+      checkAllLoaded();
     };
 
     if (modelConfig.mtl) {
