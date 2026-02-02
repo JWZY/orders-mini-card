@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Orders Widget - Vision Pro</title>
+  <link rel="stylesheet" href="styles.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <!-- Three.js Scene -->
+  <div id="scene-container"></div>
+
+  <!-- Widget -->
+  <div class="widget" id="widget">
+    <div class="widget-glass"></div>
+    <div class="widget-highlight"></div>
+
+    <div class="widget-content">
+      <!-- LEFT: Stats -->
+      <div class="widget-left">
+        <div class="widget-header">
+          <span class="widget-title">Orders</span>
+          <span class="change-badge positive" id="changeBadge">↑ 14.5%</span>
+        </div>
+
+        <div class="metric-section">
+          <div class="metric-value" id="orderCount">1,247</div>
+          <div class="metric-subtitle">Nov 9-15</div>
+        </div>
+
+        <div class="sparkline-section">
+          <svg id="sparkline" class="sparkline" viewBox="0 0 300 60" preserveAspectRatio="none"></svg>
+          <div class="sparkline-scrim"></div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Live Feed -->
+      <div class="widget-right">
+        <div class="feed-container">
+          <div class="feed-list" id="feedList">
+            <!-- Orders rendered by JS -->
+          </div>
+          <div class="feed-scrim"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
