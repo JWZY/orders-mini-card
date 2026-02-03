@@ -209,6 +209,11 @@ let targetCameraX = 0, targetCameraY = 0;
 const cameraBasePos = { x: -0.02, y: 0.39, z: 1.10 };
 const cameraMoveStrength = { x: 0.15, y: 0.08 }; // How much camera moves with mouse
 
+// Mobile/gyroscope support
+let isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+let gyroEnabled = false;
+let gyroX = 0, gyroY = 0;
+
 function initScene() {
   const container = document.getElementById('scene-container');
 
@@ -216,9 +221,19 @@ function initScene() {
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0xd8d4cf);
 
-  // Camera
-  camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 100);
-  camera.position.set(-0.02, 0.39, 1.10);
+  // Camera - adjust FOV and position for mobile
+  const fov = isMobile ? 65 : 50;
+  camera = new THREE.PerspectiveCamera(fov, window.innerWidth / window.innerHeight, 0.1, 100);
+
+  if (isMobile) {
+    // Pull back and center for mobile
+    camera.position.set(0, 0.5, 1.4);
+    cameraBasePos.x = 0;
+    cameraBasePos.y = 0.5;
+    cameraBasePos.z = 1.4;
+  } else {
+    camera.position.set(-0.02, 0.39, 1.10);
+  }
 
   // WebGL Renderer
   renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -243,7 +258,7 @@ function initScene() {
   controls.enableRotate = false; // Disable click-drag rotation
   controls.enablePan = false; // Disable panning
   controls.enableZoom = false; // Disable scroll zoom
-  controls.target.set(0, 0.30, 0);
+  controls.target.set(0, isMobile ? 0.45 : 0.30, 0);
 
   // Lighting
   setupLighting();
@@ -416,12 +431,63 @@ window.addEventListener('resize', () => {
   cssRenderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-// Mouse tracking for camera movement
+// Mouse tracking for camera movement (desktop)
 window.addEventListener('mousemove', (e) => {
+  if (isMobile) return;
   // Convert to -1 to 1 range (center = 0)
   mouseX = (e.clientX / window.innerWidth) * 2 - 1;
   mouseY = -((e.clientY / window.innerHeight) * 2 - 1); // Invert Y
 });
+
+// Gyroscope for camera movement (mobile)
+function handleOrientation(e) {
+  if (!gyroEnabled) return;
+  // beta: front/back tilt (-180 to 180), gamma: left/right tilt (-90 to 90)
+  // Normalize to -1 to 1 range, assuming phone held at ~45 degrees
+  const beta = e.beta || 0;   // front/back
+  const gamma = e.gamma || 0; // left/right
+
+  // Center around typical holding angle (~40-50 degrees)
+  gyroY = Math.max(-1, Math.min(1, (beta - 45) / 30));
+  gyroX = Math.max(-1, Math.min(1, gamma / 30));
+
+  // Use gyro values for camera
+  mouseX = gyroX;
+  mouseY = -gyroY;
+}
+
+function enableGyro() {
+  if (typeof DeviceOrientationEvent !== 'undefined' &&
+      typeof DeviceOrientationEvent.requestPermission === 'function') {
+    // iOS 13+ requires permission
+    DeviceOrientationEvent.requestPermission()
+      .then(permission => {
+        if (permission === 'granted') {
+          gyroEnabled = true;
+          window.addEventListener('deviceorientation', handleOrientation);
+        }
+      })
+      .catch(console.error);
+  } else if ('DeviceOrientationEvent' in window) {
+    // Android and older iOS
+    gyroEnabled = true;
+    window.addEventListener('deviceorientation', handleOrientation);
+  }
+}
+
+// Auto-enable gyro on mobile, or enable on first tap for iOS
+if (isMobile) {
+  if (typeof DeviceOrientationEvent !== 'undefined' &&
+      typeof DeviceOrientationEvent.requestPermission === 'function') {
+    // iOS needs user gesture - enable on first tap
+    document.addEventListener('touchstart', function initGyro() {
+      enableGyro();
+      document.removeEventListener('touchstart', initGyro);
+    }, { once: true });
+  } else {
+    enableGyro();
+  }
+}
 
 // ============================================
 // INIT
