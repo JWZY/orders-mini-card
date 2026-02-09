@@ -205,14 +205,14 @@ scheduleNextOrder();
 let scene, camera, renderer, cssRenderer, controls;
 let lights = {}; // Store lights for GUI control
 let mouseX = 0, mouseY = 0;
-let targetCameraX = 0, targetCameraY = 0;
-const cameraBasePos = { x: -0.02, y: 0.39, z: 1.10 };
-const cameraMoveStrength = isMobile ? { x: 0.5, y: 0.3 } : { x: 0.15, y: 0.08 };
-
 // Mobile/gyroscope support
 let isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 let gyroEnabled = false;
 let gyroX = 0, gyroY = 0;
+
+let targetCameraX = 0, targetCameraY = 0;
+const cameraBasePos = { x: -0.02, y: 0.39, z: 1.10 };
+const cameraMoveStrength = isMobile ? { x: 0.5, y: 0.3 } : { x: 0.15, y: 0.08 };
 
 function initScene() {
   const container = document.getElementById('scene-container');
