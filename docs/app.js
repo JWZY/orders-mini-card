@@ -207,7 +207,7 @@ let lights = {}; // Store lights for GUI control
 let mouseX = 0, mouseY = 0;
 let targetCameraX = 0, targetCameraY = 0;
 const cameraBasePos = { x: -0.02, y: 0.39, z: 1.10 };
-const cameraMoveStrength = { x: 0.15, y: 0.08 }; // How much camera moves with mouse
+const cameraMoveStrength = isMobile ? { x: 0.5, y: 0.3 } : { x: 0.15, y: 0.08 };
 
 // Mobile/gyroscope support
 let isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
@@ -222,15 +222,15 @@ function initScene() {
   scene.background = new THREE.Color(0xd8d4cf);
 
   // Camera - adjust FOV and position for mobile
-  const fov = isMobile ? 65 : 50;
+  const fov = isMobile ? 70 : 50;
   camera = new THREE.PerspectiveCamera(fov, window.innerWidth / window.innerHeight, 0.1, 100);
 
   if (isMobile) {
-    // Pull back and center for mobile
-    camera.position.set(0, 0.5, 1.4);
+    // Pull back and center for mobile - wider view for tilt range
+    camera.position.set(0, 0.5, 1.8);
     cameraBasePos.x = 0;
     cameraBasePos.y = 0.5;
-    cameraBasePos.z = 1.4;
+    cameraBasePos.z = 1.8;
   } else {
     camera.position.set(-0.02, 0.39, 1.10);
   }
@@ -474,6 +474,11 @@ function enableGyro() {
 // Show gyro hint overlay on mobile, dismiss on tap (doubles as iOS user gesture)
 if (isMobile) {
   const hint = document.getElementById('gyro-hint');
+  const needsPermission = typeof DeviceOrientationEvent !== 'undefined' &&
+    typeof DeviceOrientationEvent.requestPermission === 'function';
+  hint.querySelector('p').textContent = needsPermission
+    ? 'Tap to enable tilt controls'
+    : 'Tilt your phone to look around';
   hint.style.display = '';
   hint.addEventListener('click', () => {
     enableGyro();
