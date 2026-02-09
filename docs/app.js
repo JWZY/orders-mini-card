@@ -441,25 +441,22 @@ window.addEventListener('mousemove', (e) => {
 
 // Gyroscope for camera movement (mobile)
 function handleOrientation(e) {
-  if (!gyroEnabled) return;
-  // beta: front/back tilt (-180 to 180), gamma: left/right tilt (-90 to 90)
-  // Normalize to -1 to 1 range, assuming phone held at ~45 degrees
-  const beta = e.beta || 0;   // front/back
-  const gamma = e.gamma || 0; // left/right
+  const beta = e.beta || 0;   // front/back tilt (-180 to 180)
+  const gamma = e.gamma || 0; // left/right tilt (-90 to 90)
 
   // Center around typical holding angle (~40-50 degrees)
   gyroY = Math.max(-1, Math.min(1, (beta - 45) / 30));
   gyroX = Math.max(-1, Math.min(1, gamma / 30));
 
-  // Use gyro values for camera
   mouseX = gyroX;
   mouseY = -gyroY;
 }
 
 function enableGyro() {
+  if (gyroEnabled) return;
   if (typeof DeviceOrientationEvent !== 'undefined' &&
       typeof DeviceOrientationEvent.requestPermission === 'function') {
-    // iOS 13+ requires permission
+    // iOS 13+ requires permission (must be called from user gesture)
     DeviceOrientationEvent.requestPermission()
       .then(permission => {
         if (permission === 'granted') {
@@ -469,24 +466,20 @@ function enableGyro() {
       })
       .catch(console.error);
   } else if ('DeviceOrientationEvent' in window) {
-    // Android and older iOS
     gyroEnabled = true;
     window.addEventListener('deviceorientation', handleOrientation);
   }
 }
 
-// Auto-enable gyro on mobile, or enable on first tap for iOS
+// Show gyro hint overlay on mobile, dismiss on tap (doubles as iOS user gesture)
 if (isMobile) {
-  if (typeof DeviceOrientationEvent !== 'undefined' &&
-      typeof DeviceOrientationEvent.requestPermission === 'function') {
-    // iOS needs user gesture - enable on first tap
-    document.addEventListener('touchstart', function initGyro() {
-      enableGyro();
-      document.removeEventListener('touchstart', initGyro);
-    }, { once: true });
-  } else {
+  const hint = document.getElementById('gyro-hint');
+  hint.style.display = '';
+  hint.addEventListener('click', () => {
     enableGyro();
-  }
+    hint.classList.add('dismissing');
+    setTimeout(() => hint.remove(), 400);
+  }, { once: true });
 }
 
 // ============================================

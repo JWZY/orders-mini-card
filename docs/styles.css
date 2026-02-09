@@ -37,6 +37,35 @@ body.ready {
   opacity: 1;
 }
 
+/* ========== GYRO HINT OVERLAY (mobile) ========== */
+.gyro-hint {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  opacity: 1;
+  transition: opacity 0.4s ease-out;
+}
+
+.gyro-hint.dismissing {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.gyro-hint p {
+  font-size: 18px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.85);
+  letter-spacing: -0.01em;
+  text-align: center;
+  padding: 0 40px;
+}
+
 /* ========== SCENE ========== */
 #scene-container {
   position: fixed;
